@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcard303 - Learn Literary and Grammar Terms</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f0f2f5;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+        
+        .mode-btn {
+            padding: 12px 24px;
+            background-color: white;
+            border: 2px solid var(--primary);
+            border-radius: var(--border-radius);
+            color: var(--primary);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mode-btn.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .mode-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .content-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        /* 学习模式样式 */
+        .flashcards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+        
+        .flashcard {
+            perspective: 1000px;
+            height: 200px;
+            cursor: pointer;
+        }
+        
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        
+        .flashcard.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .flashcard-front {
+            background-color: white;
+            color: var(--primary);
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .flashcard-back {
+            background-color: var(--primary);
+            color: white;
+            transform: rotateY(180deg);
+            text-align: center;
+        }
+        
+        /* 测试模式样式 */
+        .test-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 30px;
+        }
+        
+        .test-question {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            text-align: center;
+            color: var(--dark);
+        }
+        
+        .test-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+        
+        .test-input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+        
+        .test-feedback {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 20px;
+            min-height: 24px;
+        }
+        
+        .correct {
+            color: var(--success);
+        }
+        
+        .incorrect {
+            color: var(--danger);
+        }
+        
+        .test-btn {
+            padding: 12px 24px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .test-btn:hover {
+            background-color: var(--secondary);
+        }
+        
+        /* 结果区域样式 */
+        .results-container {
+            width: 100%;
+            max-width: 800px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 30px;
+            display: none;
+        }
+        
+        .results-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+        
+        .score-container {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+        }
+        
+        .score-box {
+            text-align: center;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            width: 45%;
+        }
+        
+        .correct-score {
+            background-color: rgba(76, 201, 240, 0.2);
+            color: var(--success);
+        }
+        
+        .incorrect-score {
+            background-color: rgba(247, 37, 133, 0.2);
+            color: var(--danger);
+        }
+        
+        .score-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .study-list {
+            margin-top: 20px;
+        }
+        
+        .study-item {
+            padding: 15px;
+            border-left: 4px solid var(--primary);
+            background-color: #f8f9fa;
+            margin-bottom: 10px;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+        }
+        
+        .term {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: var(--gray);
+        }
+        
+        @media (max-width: 768px) {
+            .flashcards-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .score-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .score-box {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Flashcard303</h1>
+            <p class="description">Learn and test your knowledge of literary and grammar terms with interactive flashcards.</p>
+        </header>
+        
+        <div class="mode-selector">
+            <button class="mode-btn active" id="learn-mode-btn">Learn Mode</button>
+            <button class="mode-btn" id="test-mode-btn">Test Mode</button>
+        </div>
+        
+        <div class="content-area">
+            <!-- 学习模式 -->
+            <div class="flashcards-container" id="learn-container">
+                <!-- Flashcards will be generated here by JavaScript -->
+            </div>
+            
+            <!-- 测试模式 -->
+            <div class="test-container" id="test-container" style="display: none;">
+                <div class="test-question" id="test-question">What is this word?</div>
+                <input type="text" class="test-input" id="test-input" placeholder="Enter the term...">
+                <div class="test-feedback" id="test-feedback"></div>
+                <button class="test-btn" id="submit-btn">Submit Answer</button>
+            </div>
+            
+            <!-- 结果区域 -->
+            <div class="results-container" id="results-container">
+                <h2 class="results-title">Test Results</h2>
+                <div class="score-container">
+                    <div class="score-box correct-score">
+                        <div>Correct Answers</div>
+                        <div class="score-number" id="correct-count">0</div>
+                    </div>
+                    <div class="score-box incorrect-score">
+                        <div>Incorrect Answers</div>
+                        <div class="score-number" id="incorrect-count">0</div>
+                    </div>
+                </div>
+                
+                <div id="study-list-container" style="display: none;">
+                    <h3>Terms to study:</h3>
+                    <div class="study-list" id="study-list">
+                        <!-- Study items will be generated here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Flashcard303.com - Enhance your literary and grammar knowledge</p>
+        </footer>
+    </div>
+
+    <script>
+        // 数据
+        const T = [
+            "prefix", "suffix", "root", "genre", "fiction", "non-fiction", "epilogue", "stanza", 
+            "fantasy", "narrative", "historical fiction", "realistic fiction", "science fiction", 
+            "prologue", "noun", "verb", "adverb", "adjective", "pronoun", "preposition", 
+            "conjunction", "theme", "thesis statement", "phrase", "clause", "subject", 
+            "predicate", "annotate", "analyze"
+        ];
+        
+        const D = [
+            "a group of letters added to the beginning of a word to change its meaning",
+            "a group of letters added to the end of a word to change its meaning or how it's used",
+            "the main part of a word that gives the word its basic meaning",
+            "a category of artistic composition, as in music or literature, characterized by similarities in form, style, or subject matter",
+            "narrative literary works whose content is produced by the imagination and is not necessarily based on fact.",
+            "informational text dealing with an actual, real-life subject.",
+            "a section or speech at the end of a book or play that serves as a comment on or a conclusion to what has happened.",
+            "a group of lines separated from each other by line breaks",
+            "fiction with strange or other worldly settings or characters; fiction which invites suspension of reality",
+            "a spoken or written account of connected events; a story",
+            "story with fictional characters and events in a historical setting.",
+            "story that can actually happen and is true to life.",
+            "story based on impact of actual, imagined, or potential science, usually set in the future or on other planets",
+            "a separate introductory section of a literary or musical work",
+            "a person, place, thing, or idea",
+            "a word that expresses action or being",
+            "a word that modifies or describes a verb, an adjective, or another adverb",
+            "a word that modifies or describes a noun or pronoun",
+            "a word used in place of a noun",
+            "a word placed before a noun or pronoun to form a phrase modifying another word in the sentence.",
+            "a word that joins words, phrases, or clauses",
+            "the central idea, message, or underlying meaning of a story",
+            "a sentence or two that expresses the main idea or argument of a piece of writing (typically an essay)",
+            "a group of words that does not contain both a subject and a verb",
+            "a group of words containing a subject and a verb",
+            "who or what a sentence is about",
+            "what the subject of a sentence is or does",
+            "to add short notes to a book or piece of writing to explain parts of it",
+            "to look at something carefully and think about its parts so you can understand it better"
+        ];
+        
+        // 状态变量
+        let currentMode = 'learn';
+        let currentTestIndex = 0;
+        let correctAnswers = [];
+        let wrongAnswers = [];
+        let wrongTerms = [];
+        let wrongDefinitions = [];
+        
+        // DOM 元素
+        const learnModeBtn = document.getElementById('learn-mode-btn');
+        const testModeBtn = document.getElementById('test-mode-btn');
+        const learnContainer = document.getElementById('learn-container');
+        const testContainer = document.getElementById('test-container');
+        const testQuestion = document.getElementById('test-question');
+        const testInput = document.getElementById('test-input');
+        const testFeedback = document.getElementById('test-feedback');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const correctCount = document.getElementById('correct-count');
+        const incorrectCount = document.getElementById('incorrect-count');
+        const studyListContainer = document.getElementById('study-list-container');
+        const studyList = document.getElementById('study-list');
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            generateFlashcards();
+            setupEventListeners();
+        });
+        
+        // 生成抽认卡
+        function generateFlashcards() {
+            learnContainer.innerHTML = '';
+            
+            for (let i = 0; i < T.length; i++) {
+                const flashcard = document.createElement('div');
+                flashcard.className = 'flashcard';
+                flashcard.innerHTML = `
+                    <div class="flashcard-inner">
+                        <div class="flashcard-front">
+                            ${T[i]}
+                        </div>
+                        <div class="flashcard-back">
+                            ${D[i]}
+                        </div>
+                    </div>
+                `;
+                
+                flashcard.addEventListener('click', function() {
+                    this.classList.toggle('flipped');
+                });
+                
+                learnContainer.appendChild(flashcard);
+            }
+        }
+        
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 模式切换
+            learnModeBtn.addEventListener('click', function() {
+                switchMode('learn');
+            });
+            
+            testModeBtn.addEventListener('click', function() {
+                switchMode('test');
+            });
+            
+            // 提交答案
+            submitBtn.addEventListener('click', checkAnswer);
+            testInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkAnswer();
+                }
+            });
+        }
+        
+        // 切换模式
+        function switchMode(mode) {
+            currentMode = mode;
+            
+            if (mode === 'learn') {
+                learnModeBtn.classList.add('active');
+                testModeBtn.classList.remove('active');
+                learnContainer.style.display = 'grid';
+                testContainer.style.display = 'none';
+                resultsContainer.style.display = 'none';
+            } else {
+                learnModeBtn.classList.remove('active');
+                testModeBtn.classList.add('active');
+                learnContainer.style.display = 'none';
+                testContainer.style.display = 'block';
+                resultsContainer.style.display = 'none';
+                
+                // 重置测试状态
+                currentTestIndex = 0;
+                correctAnswers = [];
+                wrongAnswers = [];
+                wrongTerms = [];
+                wrongDefinitions = [];
+                
+                startTest();
+            }
+        }
+        
+        // 开始测试
+        function startTest() {
+            if (currentTestIndex < T.length) {
+                testQuestion.textContent = `What is this word? "${D[currentTestIndex]}"`;
+                testInput.value = '';
+                testFeedback.textContent = '';
+                testInput.focus();
+            } else {
+                // 第一轮测试结束，检查是否有错误答案
+                if (wrongAnswers.length > 0) {
+                    testQuestion.textContent = "Let's try again.";
+                    currentTestIndex = 0;
+                    T.length = wrongTerms.length;
+                    D.length = wrongDefinitions.length;
+                    
+                    // 复制错误的术语和定义到主数组
+                    T.splice(0, T.length, ...wrongTerms);
+                    D.splice(0, D.length, ...wrongDefinitions);
+                    
+                    // 清空错误数组，为第二轮准备
+                    wrongTerms = [];
+                    wrongDefinitions = [];
+                    
+                    startTest();
+                } else {
+                    showResults();
+                }
+            }
+        }
+        
+        // 检查答案
+        function checkAnswer() {
+            const userAnswer = testInput.value.trim().toLowerCase();
+            const correctAnswer = T[currentTestIndex].toLowerCase();
+            
+            if (userAnswer === '') {
+                testFeedback.textContent = 'Please enter an answer.';
+                testFeedback.className = 'test-feedback incorrect';
+                return;
+            }
+            
+            if (userAnswer === correctAnswer) {
+                testFeedback.textContent = 'You got it right!';
+                testFeedback.className = 'test-feedback correct';
+                correctAnswers.push({
+                    term: T[currentTestIndex],
+                    definition: D[currentTestIndex]
+                });
+            } else {
+                testFeedback.textContent = `You got it wrong. The correct answer is "${T[currentTestIndex]}".`;
+                testFeedback.className = 'test-feedback incorrect';
+                wrongAnswers.push({
+                    term: T[currentTestIndex],
+                    definition: D[currentTestIndex],
+                    userAnswer: userAnswer
+                });
+                wrongTerms.push(T[currentTestIndex]);
+                wrongDefinitions.push(D[currentTestIndex]);
+            }
+            
+            currentTestIndex++;
+            
+            setTimeout(() => {
+                if (currentTestIndex < T.length || wrongAnswers.length > 0) {
+                    startTest();
+                } else {
+                    showResults();
+                }
+            }, 1500);
+        }
+        
+        // 显示结果
+        function showResults() {
+            testContainer.style.display = 'none';
+            resultsContainer.style.display = 'block';
+            
+            correctCount.textContent = correctAnswers.length;
+            incorrectCount.textContent = wrongAnswers.length;
+            
+            // 如果有需要学习的术语，显示它们
+            if (wrongAnswers.length > 0) {
+                studyListContainer.style.display = 'block';
+                studyList.innerHTML = '';
+                
+                wrongAnswers.forEach(item => {
+                    const studyItem = document.createElement('div');
+                    studyItem.className = 'study-item';
+                    studyItem.innerHTML = `
+                        <div class="term">${item.term}</div>
+                        <div class="definition">${item.definition}</div>
+                    `;
+                    studyList.appendChild(studyItem);
+                });
+            } else {
+                studyListContainer.style.display = 'none';
+            }
+            
+            // 恢复原始数据
+            T.splice(0, T.length, ...[
+                "prefix", "suffix", "root", "genre", "fiction", "non-fiction", "epilogue", "stanza", 
+                "fantasy", "narrative", "historical fiction", "realistic fiction", "science fiction", 
+                "prologue", "noun", "verb", "adverb", "adjective", "pronoun", "preposition", 
+                "conjunction", "theme", "thesis statement", "phrase", "clause", "subject", 
+                "predicate", "annotate", "analyze"
+            ]);
+            
+            D.splice(0, D.length, ...[
+                "a group of letters added to the beginning of a word to change its meaning",
+                "a group of letters added to the end of a word to change its meaning or how it's used",
+                "the main part of a word that gives the word its basic meaning",
+                "a category of artistic composition, as in music or literature, characterized by similarities in form, style, or subject matter",
+                "narrative literary works whose content is produced by the imagination and is not necessarily based on fact.",
+                "informational text dealing with an actual, real-life subject.",
+                "a section or speech at the end of a book or play that serves as a comment on or a conclusion to what has happened.",
+                "a group of lines separated from each other by line breaks",
+                "fiction with strange or other worldly settings or characters; fiction which invites suspension of reality",
+                "a spoken or written account of connected events; a story",
+                "story with fictional characters and events in a historical setting.",
+                "story that can actually happen and is true to life.",
+                "story based on impact of actual, imagined, or potential science, usually set in the future or on other planets",
+                "a separate introductory section of a literary or musical work",
+                "a person, place, thing, or idea",
+                "a word that expresses action or being",
+                "a word that modifies or describes a verb, an adjective, or another adverb",
+                "a word that modifies or describes a noun or pronoun",
+                "a word used in place of a noun",
+                "a word placed before a noun or pronoun to form a phrase modifying another word in the sentence.",
+                "a word that joins words, phrases, or clauses",
+                "the central idea, message, or underlying meaning of a story",
+                "a sentence or two that expresses the main idea or argument of a piece of writing (typically an essay)",
+                "a group of words that does not contain both a subject and a verb",
+                "a group of words containing a subject and a verb",
+                "who or what a sentence is about",
+                "what the subject of a sentence is or does",
+                "to add short notes to a book or piece of writing to explain parts of it",
+                "to look at something carefully and think about its parts so you can understand it better"
+            ]);
+        }
+    </script>
+</body>
+</html>
